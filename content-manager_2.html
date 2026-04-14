@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>מנהל תוכן שבועי</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c27;--surface3:#242433;--border:#2a2a3d;
+  --accent:#7c5cfc;--accent2:#c084fc;--gold:#fbbf24;--green:#34d399;--red:#f87171;
+  --blue:#60a5fa;--pink:#f472b6;--text:#f0f0f8;--text2:#9090b0;--text3:#606080;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Heebo',sans-serif;direction:rtl;background:var(--bg);color:var(--text);min-height:100vh;
+  background-image:radial-gradient(ellipse at 20% 20%,rgba(124,92,252,0.08) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 80%,rgba(192,132,252,0.05) 0%,transparent 50%);
+}
+.app-header{
+  display:flex;align-items:center;justify-content:space-between;padding:13px 22px;
+  border-bottom:1px solid var(--border);background:rgba(19,19,26,0.97);
+  backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:35px;height:35px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;}
+.logo-text{font-size:17px;font-weight:900;}
+.logo-sub{font-size:10px;color:var(--text2);}
+.header-mid{display:flex;align-items:center;gap:8px;}
+.week-nav{display:flex;align-items:center;gap:7px;}
+.week-lbl{font-size:12px;font-weight:700;color:var(--text2);min-width:128px;text-align:center;}
+.icon-btn{width:31px;height:31px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s;}
+.icon-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--accent);}
+.role-toggle{display:flex;background:var(--surface2);border-radius:9px;border:1px solid var(--border);overflow:hidden;}
+.rbtn{padding:6px 15px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--text2);font-family:'Heebo',sans-serif;transition:all .2s;}
+.rbtn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.sync-pill{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text3);padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--text3);transition:background .3s;}
+.sdot.syncing{background:var(--gold);animation:pulse 1s infinite;}
+.sdot.ok{background:var(--green);}
+.sdot.err{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.main{display:flex;}
+.days-nav{width:115px;flex-shrink:0;border-left:1px solid var(--border);padding:14px 0;background:var(--surface);position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto;}
+.dbtn{width:100%;padding:11px 0;text-align:center;cursor:pointer;border:none;background:transparent;color:var(--text2);font-family:'Heebo',sans-serif;font-size:12px;font-weight:700;border-right:3px solid transparent;transition:all .15s;}
+.dbtn:hover{color:var(--text);background:var(--surface2);}
+.dbtn.active{color:var(--accent2);background:rgba(124,92,252,.08);border-right-color:var(--accent);}
+.dcnt{font-size:9px;color:var(--text3);font-weight:400;display:block;margin-top:1px;}
+.dbtn.active .dcnt{color:var(--accent);}
+.ddots{display:flex;gap:3px;justify-content:center;margin-top:4px;}
+.ddot{width:5px;height:5px;border-radius:50%;}
+.content{flex:1;padding:20px 22px;min-width:0;}
+.sum{width:250px;flex-shrink:0;border-right:1px solid var(--border);padding:16px 13px;background:var(--surface);position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto;}
+.sum-h{font-size:10px;font-weight:700;color:var(--text2);margin-bottom:11px;letter-spacing:.5px;}
+.srow{display:flex;gap:7px;margin-bottom:9px;}
+.scard{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:11px 9px;}
+.slbl{font-size:9px;color:var(--text3);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px;}
+.sval{font-size:22px;font-weight:900;}
+.ssub{font-size:9px;color:var(--text2);margin-top:1px;}
+.prog-card{background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:11px;margin-bottom:9px;}
+.prog-top{display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-bottom:6px;}
+.prog-bar{height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s;}
+.type-card{background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:11px;margin-bottom:9px;}
+.trow{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);}
+.trow:last-child{border:none;}
+.tlbl{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);}
+.tdot{width:6px;height:6px;border-radius:50%;}
+.tcnt{font-size:11px;font-weight:700;}
+.exp-btn{width:100%;padding:8px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-family:'Heebo',sans-serif;font-size:11px;font-weight:700;transition:all .15s;margin-bottom:5px;display:flex;align-items:center;justify-content:center;gap:5px;}
+.exp-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--accent);}
+.day-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.day-ttl{font-size:22px;font-weight:900;}
+.day-dt{font-size:11px;color:var(--text2);margin-top:2px;}
+.day-acts{display:flex;gap:6px;}
+.btn{padding:6px 13px;border-radius:8px;border:none;cursor:pointer;font-family:'Heebo',sans-serif;font-size:11px;font-weight:700;transition:all .15s;display:flex;align-items:center;gap:4px;}
+.bp{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.bp:hover{opacity:.88;}
+.bg{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.bg:hover{background:var(--surface3);color:var(--text);}
+.bgr{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.2);}
+.bgr:hover{background:rgba(52,211,153,.2);}
+.slots{display:flex;flex-direction:column;gap:11px;}
+.slot{background:var(--surface);border:1px solid var(--border);border-radius:13px;overflow:hidden;transition:border-color .2s;}
+.slot.has{border-color:rgba(124,92,252,.22);}
+.slot.has:hover{border-color:rgba(124,92,252,.42);}
+.slot-hdr{display:flex;align-items:center;gap:9px;padding:12px 15px;cursor:pointer;border-bottom:1px solid transparent;transition:border-color .15s;}
+.slot.open .slot-hdr{border-bottom-color:var(--border);}
+.stime{font-size:18px;font-weight:900;color:var(--accent2);min-width:52px;font-variant-numeric:tabular-nums;}
+.tbadge{padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;border:1px solid currentColor;flex-shrink:0;}
+.t-reel{color:#7c5cfc;background:rgba(124,92,252,.1);}
+.t-carousel{color:#fbbf24;background:rgba(251,191,36,.1);}
+.t-post{color:#34d399;background:rgba(52,211,153,.1);}
+.t-story{color:#f472b6;background:rgba(244,114,182,.1);}
+.t-live{color:#f87171;background:rgba(248,113,113,.1);}
+.sprev{flex:1;font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.stbadge{padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;flex-shrink:0;}
+.sp{background:rgba(251,191,36,.1);color:var(--gold);border:1px solid rgba(251,191,36,.2);}
+.sa{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.2);}
+.su{background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.2);}
+.chev{color:var(--text3);font-size:10px;transition:transform .2s;flex-shrink:0;}
+.slot.open .chev{transform:rotate(180deg);}
+.slot-body{display:none;padding:15px;}
+.slot.open .slot-body{display:block;}
+.egrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.full{grid-column:1/-1;}
+.flbl{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px;display:block;}
+.fi,.fs,.ft{width:100%;padding:8px 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Heebo',sans-serif;font-size:12px;transition:border-color .15s,box-shadow .15s;}
+.fi:focus,.fs:focus,.ft:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,252,.1);}
+.ft{min-height:78px;resize:vertical;line-height:1.6;}
+.ft.cap{min-height:105px;}
+.fs{cursor:pointer;appearance:none;}
+.fs option{background:#1c1c27;}
+.capwrap{position:relative;}
+.cpbtn{position:absolute;top:7px;left:7px;padding:3px 8px;border-radius:5px;border:none;cursor:pointer;background:rgba(124,92,252,.18);color:var(--accent2);font-size:9px;font-weight:700;font-family:'Heebo',sans-serif;transition:all .15s;}
+.cpbtn:hover{background:rgba(124,92,252,.35);}
+.cpbtn.copied{background:rgba(52,211,153,.2);color:var(--green);}
+.vfield{padding:9px 11px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--text);line-height:1.6;white-space:pre-wrap;border:1px solid var(--border);}
+.cmts-wrap{margin-top:13px;border-top:1px solid var(--border);padding-top:13px;}
+.cmts-lbl{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:9px;}
+.cmt{display:flex;gap:7px;margin-bottom:7px;}
+.cav{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;}
+.cavp{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.cavm{background:linear-gradient(135deg,var(--green),#059669);color:#fff;}
+.cbub{background:var(--surface2);border:1px solid var(--border);border-radius:9px 9px 9px 2px;padding:6px 10px;font-size:11px;line-height:1.5;color:var(--text);flex:1;}
+.cbub.mine{border-radius:9px 9px 2px 9px;background:rgba(124,92,252,.08);border-color:rgba(124,92,252,.2);}
+.cmeta{font-size:9px;color:var(--text3);margin-top:2px;}
+.cinrow{display:flex;gap:6px;margin-top:8px;}
+.cin{flex:1;padding:6px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Heebo',sans-serif;font-size:11px;}
+.cin:focus{outline:none;border-color:var(--accent);}
+.csend{padding:6px 12px;border-radius:7px;border:none;cursor:pointer;background:var(--accent);color:#fff;font-size:11px;font-weight:700;font-family:'Heebo',sans-serif;transition:opacity .15s;}
+.csend:hover{opacity:.85;}
+.slot-ftr{display:flex;justify-content:space-between;align-items:center;margin-top:13px;padding-top:11px;border-top:1px solid var(--border);}
+.sbtns{display:flex;gap:5px;}
+.sbtn{padding:4px 11px;border-radius:7px;border:none;cursor:pointer;font-size:10px;font-weight:700;font-family:'Heebo',sans-serif;transition:all .15s;opacity:.5;}
+.sbtn.active{opacity:1;}
+.sbp{background:rgba(251,191,36,.12);color:var(--gold);}
+.sbp.active{box-shadow:0 0 0 1px rgba(251,191,36,.35);}
+.sba{background:rgba(52,211,153,.12);color:var(--green);}
+.sba.active{box-shadow:0 0 0 1px rgba(52,211,153,.35);}
+.sbu{background:rgba(96,165,250,.12);color:var(--blue);}
+.sbu.active{box-shadow:0 0 0 1px rgba(96,165,250,.35);}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--surface3);color:var(--text);padding:8px 16px;border-radius:9px;font-size:12px;font-weight:700;border:1px solid var(--border);opacity:0;transition:all .25s;pointer-events:none;z-index:999;box-shadow:0 8px 28px rgba(0,0,0,.5);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.loading{position:fixed;inset:0;background:rgba(10,10,15,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;gap:13px;}
+.loading.hidden{display:none;}
+.spinner{width:38px;height:38px;border-radius:50%;border:3px solid var(--surface3);border-top-color:var(--accent);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.ltxt{font-size:13px;color:var(--text2);font-weight:700;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <div class="ltxt">מתחבר ל-Google Sheets...</div>
+</div>
+
+<header class="app-header">
+  <div class="logo">
+    <div class="logo-icon">📅</div>
+    <div><div class="logo-text">Content Manager</div><div class="logo-sub">ניהול תוכן שבועי לסושיאל</div></div>
+  </div>
+  <div class="header-mid">
+    <div class="week-nav">
+      <button class="icon-btn" onclick="changeWeek(-1)">›</button>
+      <div class="week-lbl" id="wlbl">טוען...</div>
+      <button class="icon-btn" onclick="changeWeek(1)">‹</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:7px;align-items:center;">
+    <div class="sync-pill"><div class="sdot" id="sdot"></div><span id="stxt">לא מסונכרן</span></div>
+    <div class="role-toggle">
+      <button class="rbtn active" id="btn-partner" onclick="setRole('partner')">✍️ שותף</button>
+      <button class="rbtn" id="btn-me" onclick="setRole('me')">📱 אני</button>
+    </div>
+    <button class="icon-btn" title="סנכרן" onclick="syncNow()">🔄</button>
+  </div>
+</header>
+
+<div class="main">
+  <nav class="days-nav" id="days-nav"></nav>
+  <div class="content" id="content"></div>
+  <aside class="sum">
+    <div class="sum-h">📊 סיכום שבועי</div>
+    <div class="srow">
+      <div class="scard"><div class="slbl">סה"כ</div><div class="sval" id="st0">0</div><div class="ssub">פוסטים</div></div>
+      <div class="scard"><div class="slbl">מוכן</div><div class="sval" id="st1" style="color:var(--green)">0</div><div class="ssub">מאושר+עלה</div></div>
+    </div>
+    <div class="prog-card">
+      <div class="prog-top"><span>התקדמות</span><span id="st2">0%</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="st3" style="width:0%"></div></div>
+    </div>
+    <div class="type-card">
+      <div class="sum-h" style="margin-bottom:7px;">לפי סוג</div>
+      <div id="tlist"></div>
+    </div>
+    <div class="sum-h" style="margin-bottom:7px;">📤 ייצוא</div>
+    <button class="exp-btn" onclick="exportDay()">📄 ייצא יום נוכחי</button>
+    <button class="exp-btn" onclick="exportWeek()">📋 ייצא שבוע מלא</button>
+  </aside>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API='https://script.google.com/macros/s/AKfycbyk0h1ymqNzNghAc3VeQbkcZbbZwOFRWsxxDrRGQmCR9koRZ2jEV-d8u07l9fJ2ZYazug/exec';
+const DAYS=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+const TIMES=['09:00','12:00','16:00','20:00','22:00'];
+const TYPES=['ריל','קרוסלה','פוסט תמונה','סטורי','לייב'];
+const TKEYS=['reel','carousel','post','story','live'];
+const TCOLS=['#7c5cfc','#fbbf24','#34d399','#f472b6','#f87171'];
+
+let role='partner', curDay=new Date().getDay(), weekOff=0;
+let cache={};
+
+/* ── API ── */
+function aurl(p){return API+'?'+Object.entries(p).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&');}
+async function apiGet(key){try{const r=await fetch(aurl({action:'get',key}));const d=await r.json();return d.value?JSON.parse(d.value):null;}catch{return null;}}
+async function apiSet(key,value){try{await fetch(aurl({action:'set',key,value:JSON.stringify(value)}));return true;}catch{return false;}}
+async function apiGetAll(){try{const r=await fetch(aurl({action:'getall'}));const d=await r.json();return d.data||{};}catch{return {};}}
+
+/* ── SYNC ── */
+function setSS(state,txt){document.getElementById('sdot').className='sdot '+state;document.getElementById('stxt').textContent=txt;}
+let autoTimer=null;
+async function syncNow(){
+  setSS('syncing','מסנכרן...');
+  try{
+    const all=await apiGetAll();
+    Object.entries(all).forEach(([k,v])=>{try{cache[k]=JSON.parse(v);}catch{}});
+    setSS('ok','מסונכרן ✓');renderAll();showToast('🔄 מסונכרן!');
+  }catch{setSS('err','שגיאה');showToast('❌ שגיאת חיבור');}
+  clearTimeout(autoTimer);autoTimer=setTimeout(syncNow,1200000);
+}
+
+/* ── SLOT KEY & DATA ── */
+function sk(w,d,t){return `w${w}_d${d}_t${t.replace(':','')}`;}
+function getSlot(w,d,t){return cache[sk(w,d,t)]||{type:'',typeKey:'',template:'',content:'',caption:'',status:'ממתין',comments:[]};}
+async function saveSlot(w,d,t,data){
+  cache[sk(w,d,t)]=data;
+  setSS('syncing','שומר...');
+  const ok=await apiSet(sk(w,d,t),data);
+  if(ok)setSS('ok','נשמר ✓');else setSS('err','שגיאה');
+}
+
+/* ── WEEK ── */
+function weekDates(off){const n=new Date(),s=new Date(n);s.setDate(n.getDate()-n.getDay()+off*7);return Array.from({length:7},(_,i)=>{const d=new Date(s);d.setDate(s.getDate()+i);return d;});}
+function fd(d){return d.toLocaleDateString('he-IL',{day:'numeric',month:'numeric'});}
+function changeWeek(dir){weekOff+=dir;renderAll();}
+function updateWL(){const ds=weekDates(weekOff);document.getElementById('wlbl').textContent=fd(ds[0])+' – '+fd(ds[6]);}
+
+/* ── ROLE ── */
+function setRole(r){role=r;document.getElementById('btn-partner').classList.toggle('active',r==='partner');document.getElementById('btn-me').classList.toggle('active',r==='me');renderContent();}
+
+/* ── DAYS NAV ── */
+function renderDaysNav(){
+  document.getElementById('days-nav').innerHTML=DAYS.map((d,i)=>{
+    const f=TIMES.filter(t=>{const s=getSlot(weekOff,i,t);return s.content||s.caption||s.type;}).length;
+    const dots=TIMES.map(t=>{const s=getSlot(weekOff,i,t);const c=s.status==='עלה'?'var(--blue)':s.status==='מאושר'?'var(--green)':s.content||s.type?'var(--text3)':'transparent';return `<div class="ddot" style="background:${c}"></div>`;}).join('');
+    return `<button class="dbtn ${i===curDay?'active':''}" onclick="selDay(${i})">${d}<span class="dcnt">${f}/${TIMES.length}</span><div class="ddots">${dots}</div></button>`;
+  }).join('');
+}
+function selDay(i){curDay=i;renderDaysNav();renderContent();}
+
+/* ── CONTENT ── */
+function renderContent(){
+  const ds=weekDates(weekOff),d=ds[curDay];
+  document.getElementById('content').innerHTML=`
+    <div class="day-hdr">
+      <div><div class="day-ttl">יום ${DAYS[curDay]}</div><div class="day-dt">${d.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div></div>
+      <div class="day-acts"><button class="btn bg" onclick="clearDay()">🗑️ נקה יום</button><button class="btn bgr" onclick="approveAll()">✅ אשר הכל</button></div>
+    </div>
+    <div class="slots">${TIMES.map(renderSlot).join('')}</div>`;
+}
+
+function renderSlot(time){
+  const s=getSlot(weekOff,curDay,time),tid=time.replace(':','');
+  const has=!!(s.content||s.caption||s.type);
+  const sc=s.status==='מאושר'?'sa':s.status==='עלה'?'su':'sp';
+  const si=s.status==='מאושר'?'✅':s.status==='עלה'?'🚀':'⏳';
+  const prev=s.content||s.caption||(s.type||'ריק — לחץ להוספה');
+  return `<div class="slot ${has?'has':''}" id="sl-${tid}">
+    <div class="slot-hdr" onclick="tog('${tid}')">
+      <div class="stime">${time}</div>
+      ${s.type?`<div class="tbadge t-${s.typeKey}">${s.type}</div>`:`<div class="tbadge" style="color:var(--text3);border-color:var(--border)">+ סוג</div>`}
+      <div class="sprev">${prev}</div>
+      <div class="stbadge ${sc}">${si} ${s.status}</div>
+      <div class="chev">▼</div>
+    </div>
+    <div class="slot-body">
+      ${role==='partner'?editorH(tid,s):viewH(tid,s)}
+      ${cmtsH(tid,s)}
+      <div class="slot-ftr">
+        <div class="sbtns">
+          <button class="sbtn sbp ${s.status==='ממתין'?'active':''}" onclick="setStat('${time}','ממתין')">⏳ ממתין</button>
+          <button class="sbtn sba ${s.status==='מאושר'?'active':''}" onclick="setStat('${time}','מאושר')">✅ מאושר</button>
+          <button class="sbtn sbu ${s.status==='עלה'?'active':''}" onclick="setStat('${time}','עלה')">🚀 עלה</button>
+        </div>
+        ${role==='partner'?`<button class="btn bp" onclick="doSave('${time}')">💾 שמור</button>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function editorH(tid,s){
+  return `<div class="egrid">
+    <div><label class="flbl">סוג תוכן</label>
+      <select class="fs" id="ty-${tid}">
+        <option value="">בחר סוג...</option>
+        ${TYPES.map((t,i)=>`<option value="${TKEYS[i]}" ${s.typeKey===TKEYS[i]?'selected':''}>${t}</option>`).join('')}
+      </select></div>
+    <div><label class="flbl">טמפלייט / פורמט</label>
+      <input class="fi" id="tp-${tid}" value="${e(s.template||'')}" placeholder="טמפלייט A, 9:16..."/></div>
+    <div class="full"><label class="flbl">תוכן — מה לצלם / ליצור</label>
+      <textarea class="ft" id="ct-${tid}" placeholder="תאר בפירוט מה מצלמים, מה מראים, מה המסר...">${e(s.content||'')}</textarea></div>
+    <div class="full"><label class="flbl">קפטשן לאינסטגרם — הטקסט המדויק</label>
+      <div class="capwrap">
+        <textarea class="ft cap" id="cp-${tid}" placeholder="כתוב את הקפטשן המלא כולל אמוג'י והאשטגים...">${e(s.caption||'')}</textarea>
+        <button class="cpbtn" id="cpb-${tid}" onclick="copyC('${tid}')">📋 העתק</button>
+      </div></div>
+  </div>`;
+}
+
+function viewH(tid,s){
+  if(!s.type&&!s.content&&!s.caption)return`<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px;">השותף טרם הוסיף תוכן</div>`;
+  return `<div class="egrid">
+    ${s.type?`<div><label class="flbl">סוג תוכן</label><div class="vfield">${s.type}</div></div>`:''}
+    ${s.template?`<div><label class="flbl">טמפלייט</label><div class="vfield">${s.template}</div></div>`:''}
+    ${s.content?`<div class="full"><label class="flbl">מה לעשות</label><div class="vfield">${s.content}</div></div>`:''}
+    ${s.caption?`<div class="full"><label class="flbl">קפטשן לאינסטגרם</label><div class="capwrap">
+      <div class="vfield" style="padding-left:65px;">${s.caption}</div>
+      <button class="cpbtn" id="cpb-${tid}" onclick="copyCV('${tid}','${e(s.caption)}')">📋 העתק</button>
+    </div></div>`:''}
+  </div>`;
+}
+
+function cmtsH(tid,s){
+  const cs=s.comments||[];
+  return `<div class="cmts-wrap">
+    <div class="cmts-lbl">💬 הערות ותיאום (${cs.length})</div>
+    <div id="cm-${tid}">${cs.map(c=>`
+      <div class="cmt">
+        <div class="cav ${c.role==='partner'?'cavp':'cavm'}">${c.role==='partner'?'ש':'א'}</div>
+        <div style="flex:1"><div class="cbub ${c.role==='me'?'mine':''}">${c.text}</div><div class="cmeta">${c.role==='partner'?'שותף':'אני'} · ${c.time}</div></div>
+      </div>`).join('')}</div>
+    <div class="cinrow">
+      <input class="cin" id="ci-${tid}" placeholder="הוסף הערה..." onkeydown="if(event.key==='Enter')addCmt('${tid}')"/>
+      <button class="csend" onclick="addCmt('${tid}')">שלח</button>
+    </div>
+  </div>`;
+}
+
+function e(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ── ACTIONS ── */
+function tog(tid){document.getElementById('sl-'+tid).classList.toggle('open');}
+function opn(tid){document.getElementById('sl-'+tid)?.classList.add('open');}
+
+async function doSave(time){
+  const tid=time.replace(':','');
+  const s=getSlot(weekOff,curDay,time);
+  const ty=document.getElementById('ty-'+tid),tp=document.getElementById('tp-'+tid),ct=document.getElementById('ct-'+tid),cp=document.getElementById('cp-'+tid);
+  if(ty){s.typeKey=ty.value;s.type=TYPES[TKEYS.indexOf(ty.value)]||'';}
+  if(tp)s.template=tp.value;if(ct)s.content=ct.value;if(cp)s.caption=cp.value;
+  await saveSlot(weekOff,curDay,time,s);
+  showToast('✅ נשמר ומסונכרן!');
+  renderDaysNav();updateStats();
+  setTimeout(()=>{renderContent();opn(tid);},80);
+}
+
+async function setStat(time,status){
+  const s=getSlot(weekOff,curDay,time);s.status=status;
+  const tid=time.replace(':','');
+  await saveSlot(weekOff,curDay,time,s);
+  showToast(`סטטוס: ${status}`);
+  renderDaysNav();updateStats();
+  setTimeout(()=>{renderContent();opn(tid);},80);
+}
+
+async function addCmt(tid){
+  const inp=document.getElementById('ci-'+tid);
+  if(!inp||!inp.value.trim())return;
+  const time=tid.slice(0,2)+':'+tid.slice(2);
+  const s=getSlot(weekOff,curDay,time);
+  s.comments=s.comments||[];
+  const c={role,text:inp.value.trim(),time:new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})};
+  s.comments.push(c);inp.value='';
+  const wrap=document.getElementById('cm-'+tid);
+  if(wrap){const div=document.createElement('div');div.className='cmt';div.innerHTML=`<div class="cav ${c.role==='partner'?'cavp':'cavm'}">${c.role==='partner'?'ש':'א'}</div><div style="flex:1"><div class="cbub ${c.role==='me'?'mine':''}">${c.text}</div><div class="cmeta">${c.role==='partner'?'שותף':'אני'} · ${c.time}</div></div>`;wrap.appendChild(div);wrap.scrollTop=wrap.scrollHeight;}
+  await saveSlot(weekOff,curDay,time,s);
+}
+
+function copyC(tid){
+  const el=document.getElementById('cp-'+tid);
+  if(!el||!el.value){showToast('אין קפטשן');return;}
+  navigator.clipboard.writeText(el.value).then(()=>{cpDone(tid);showToast('📋 הקפטשן הועתק!');});
+}
+function copyCV(tid,txt){
+  const dec=document.createElement('textarea');dec.innerHTML=txt;
+  navigator.clipboard.writeText(dec.value).then(()=>{cpDone(tid);showToast('📋 הקפטשן הועתק!');});
+}
+function cpDone(tid){const b=document.getElementById('cpb-'+tid);if(b){b.textContent='✅ הועתק!';b.classList.add('copied');setTimeout(()=>{b.textContent='📋 העתק';b.classList.remove('copied');},2000);}}
+
+async function clearDay(){
+  if(!confirm(`למחוק את כל התוכן של יום ${DAYS[curDay]}?`))return;
+  for(const t of TIMES)await saveSlot(weekOff,curDay,t,{type:'',typeKey:'',template:'',content:'',caption:'',status:'ממתין',comments:[]});
+  renderAll();showToast('🗑️ היום נוקה');
+}
+async function approveAll(){
+  for(const t of TIMES){const s=getSlot(weekOff,curDay,t);if(s.content||s.caption){s.status='מאושר';await saveSlot(weekOff,curDay,t,s);}}
+  renderAll();showToast('✅ הכל אושר!');
+}
+
+/* ── STATS ── */
+function updateStats(){
+  let tot=0,rdy=0;const tc={};
+  DAYS.forEach((_,di)=>TIMES.forEach(t=>{const s=getSlot(weekOff,di,t);if(s.content||s.caption||s.type){tot++;if(s.status==='מאושר'||s.status==='עלה')rdy++;if(s.typeKey)tc[s.typeKey]=(tc[s.typeKey]||0)+1;}}));
+  const pct=tot?Math.round(rdy/tot*100):0;
+  document.getElementById('st0').textContent=tot;document.getElementById('st1').textContent=rdy;
+  document.getElementById('st2').textContent=pct+'%';document.getElementById('st3').style.width=pct+'%';
+  document.getElementById('tlist').innerHTML=TKEYS.map((k,i)=>`<div class="trow"><div class="tlbl"><div class="tdot" style="background:${TCOLS[i]}"></div>${TYPES[i]}</div><div class="tcnt">${tc[k]||0}</div></div>`).join('');
+}
+
+/* ── EXPORT ── */
+function exportDay(){
+  const ds=weekDates(weekOff);let txt=`📅 יום ${DAYS[curDay]} — ${fd(ds[curDay])}\n${'='.repeat(38)}\n\n`;
+  TIMES.forEach(t=>{const s=getSlot(weekOff,curDay,t);txt+=`🕐 ${t}\n`;if(s.type)txt+=`סוג: ${s.type}\n`;if(s.template)txt+=`טמפלייט: ${s.template}\n`;if(s.content)txt+=`תוכן:\n${s.content}\n`;if(s.caption)txt+=`\nקפטשן:\n${s.caption}\n`;txt+=`סטטוס: ${s.status}\n${'-'.repeat(28)}\n\n`;});
+  dl(txt,`יום-${DAYS[curDay]}.txt`);
+}
+function exportWeek(){
+  const ds=weekDates(weekOff);let txt=`📋 תכנית שבועית — ${fd(ds[0])} עד ${fd(ds[6])}\n${'='.repeat(46)}\n\n`;
+  DAYS.forEach((d,di)=>{txt+=`📅 יום ${d} — ${fd(ds[di])}\n${'-'.repeat(28)}\n`;TIMES.forEach(t=>{const s=getSlot(weekOff,di,t);if(!s.content&&!s.caption&&!s.type){txt+=`${t} — ריק\n`;return;}txt+=`\n${t}${s.type?' ['+s.type+']':''} (${s.status})\n`;if(s.template)txt+=`טמפלייט: ${s.template}\n`;if(s.content)txt+=`תוכן: ${s.content}\n`;if(s.caption)txt+=`קפטשן: ${s.caption}\n`;});txt+='\n';});
+  dl(txt,'תכנית-שבועית.txt');
+}
+function dl(txt,name){const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(txt);a.download=name;a.click();showToast('📄 הקובץ הורד!');}
+
+/* ── TOAST ── */
+let tTmr;
+function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(tTmr);tTmr=setTimeout(()=>el.classList.remove('show'),2300);}
+
+/* ── INIT ── */
+function renderAll(){updateWL();renderDaysNav();renderContent();updateStats();}
+
+(async()=>{
+  renderAll();
+  setSS('syncing','מתחבר...');
+  try{
+    const all=await apiGetAll();
+    Object.entries(all).forEach(([k,v])=>{try{cache[k]=JSON.parse(v);}catch{}});
+    setSS('ok','מסונכרן ✓');renderAll();
+  }catch{setSS('err','שגיאת חיבור');showToast('⚠️ בדוק חיבור לאינטרנט');}
+  document.getElementById('loading').classList.add('hidden');
+  autoTimer=setTimeout(syncNow,1200000);
+})();
+</script>
+</body>
+</html>
